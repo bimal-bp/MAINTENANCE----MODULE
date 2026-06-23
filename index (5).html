@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGX Minerals | Maintenance Module ERP</title>
+
+<!-- Bootstrap 5 -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+<!-- Custom Theme -->
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app-wrapper">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon"><i class="bi bi-gear-wide-connected"></i></div>
+      <div class="brand-text">
+        <strong>SGX MINERALS</strong>
+        <small>MAINTENANCE ERP</small>
+      </div>
+    </div>
+
+    <nav class="nav flex-column">
+      <div class="nav-section-title">Overview</div>
+      <a class="nav-link active" data-page="dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+
+      <div class="nav-section-title">Daily Operations</div>
+      <a class="nav-link" data-page="dailylog"><i class="bi bi-journal-text"></i> Daily Log Entry</a>
+
+      <div class="nav-section-title">Inventory</div>
+      <a class="nav-link" data-page="inventory"><i class="bi bi-boxes"></i> Stores &amp; Inventory</a>
+      <a class="nav-link" data-page="materialissue"><i class="bi bi-box-arrow-right"></i> Material Issue</a>
+
+      <div class="nav-section-title">Equipment Health</div>
+      <a class="nav-link" data-page="service"><i class="bi bi-tools"></i> Service Schedule <span class="nav-badge" id="serviceDueBadge" style="display:none;">0</span></a>
+      <a class="nav-link" data-page="breakdown"><i class="bi bi-exclamation-triangle"></i> Breakdown History</a>
+
+      <div class="nav-section-title">Analysis</div>
+      <a class="nav-link" data-page="costanalysis"><i class="bi bi-graph-up-arrow"></i> Cost Analysis</a>
+      <a class="nav-link" data-page="fleetkpi"><i class="bi bi-bar-chart-steps"></i> Fleet KPIs</a>
+
+      <div class="nav-section-title">System</div>
+      <a class="nav-link" data-page="settings"><i class="bi bi-sliders"></i> Settings / Data</a>
+    </nav>
+  </aside>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- ===================== MAIN ===================== -->
+  <div class="main-content">
+
+    <div class="topbar">
+      <div class="d-flex align-items-center gap-2">
+        <button id="sidebarToggle"><i class="bi bi-list"></i></button>
+        <div>
+          <h1 class="page-title" id="pageTitle">Dashboard</h1>
+          <div class="page-subtitle" id="pageSubtitle">Fleet maintenance overview &amp; KPIs</div>
+        </div>
+      </div>
+      <div class="d-flex align-items-center gap-3">
+        <div class="text-end d-none d-md-block">
+          <div style="font-size:12px;font-weight:700;color:var(--navy);">SGX Minerals Pvt. Ltd.</div>
+          <div style="font-size:11px;color:var(--text-muted);" id="todayDateDisplay"></div>
+        </div>
+        <div class="bg-navy rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" style="width:38px;height:38px;font-size:13px;">SM</div>
+      </div>
+    </div>
+
+    <div class="content-area">
+
+      <!-- ============ DASHBOARD ============ -->
+      <section class="page-section active" id="page-dashboard">
+
+        <div class="row g-3 mb-1">
+          <div class="col-6 col-md-4 col-lg-2">
+            <div class="stat-card">
+              <div class="stat-icon bg-info-soft"><i class="bi bi-fuel-pump"></i></div>
+              <div><div class="stat-value" id="kpiDieselCost">₹0</div><div class="stat-label">Diesel Cost</div></div>
+            </div>
+          </div>
+          <div class="col-6 col-md-4 col-lg-2">
+            <div class="stat-card">
+              <div class="stat-icon bg-navy"><i class="bi bi-gear"></i></div>
+              <div><div class="stat-value" id="kpiSpareCost">₹0</div><div class="stat-label">Spare Cost</div></div>
+            </div>
+          </div>
+          <div class="col-6 col-md-4 col-lg-2">
+            <div class="stat-card">
+              <div class="stat-icon bg-gold"><i class="bi bi-droplet"></i></div>
+              <div><div class="stat-value" id="kpiLubeCost">₹0</div><div class="stat-label">Lubricant Cost</div></div>
+            </div>
+          </div>
+          <div class="col-6 col-md-4 col-lg-2">
+            <div class="stat-card">
+              <div class="stat-icon bg-success-soft"><i class="bi bi-person-gear"></i></div>
+              <div><div class="stat-value" id="kpiLabourCost">₹0</div><div class="stat-label">Labour Cost</div></div>
+            </div>
+          </div>
+          <div class="col-6 col-md-4 col-lg-2">
+            <div class="stat-card">
+              <div class="stat-icon bg-danger-soft"><i class="bi bi-exclamation-triangle"></i></div>
+              <div><div class="stat-value" id="kpiBreakdownCost">₹0</div><div class="stat-label">Breakdown Cost</div></div>
+            </div>
+          </div>
+          <div class="col-6 col-md-4 col-lg-2">
+            <div class="stat-card">
+              <div class="stat-icon bg-warning-soft"><i class="bi bi-cash-stack"></i></div>
+              <div><div class="stat-value" id="kpiTotalCost">₹0</div><div class="stat-label">Total Maint. Cost</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3 mt-3">
+          <div class="col-md-3 col-6">
+            <div class="kpi-mini"><div class="val" id="kpiAvailability">0%</div><div class="lbl">Fleet Availability</div></div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="kpi-mini"><div class="val" id="kpiUtilization">0%</div><div class="lbl">Utilization</div></div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="kpi-mini"><div class="val" id="kpiCostPerTrip">₹0</div><div class="lbl">Cost / Trip</div></div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="kpi-mini"><div class="val" id="kpiCostPerTon">₹0</div><div class="lbl">Cost / Ton</div></div>
+          </div>
+        </div>
+
+        <div class="row g-3 mt-1">
+          <div class="col-md-6">
+            <div class="chart-card"><h6 class="mb-2 fw-bold text-navy" style="color:var(--navy)">Monthly Maintenance Cost Trend</h6><canvas id="chartCostTrend"></canvas></div>
+          </div>
+          <div class="col-md-6">
+            <div class="chart-card"><h6 class="mb-2 fw-bold" style="color:var(--navy)">Monthly Diesel Consumption (Ltr)</h6><canvas id="chartDiesel"></canvas></div>
+          </div>
+        </div>
+        <div class="row g-3 mt-1">
+          <div class="col-md-6">
+            <div class="chart-card"><h6 class="mb-2 fw-bold" style="color:var(--navy)">Breakdown Category Analysis</h6><canvas id="chartBreakdownCat"></canvas></div>
+          </div>
+          <div class="col-md-6">
+            <div class="chart-card">
+              <h6 class="mb-2 fw-bold" style="color:var(--navy)">Service Due Alerts</h6>
+              <div id="dashboardServiceAlerts" style="max-height:280px;overflow-y:auto;">
+                <div class="empty-state"><i class="bi bi-check-circle"></i>No alerts to show</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel mt-3">
+          <div class="panel-header">
+            <h6><i class="bi bi-table"></i> Equipment Wise Cost Summary</h6>
+            <div class="search-filter-bar no-print">
+              <button class="btn btn-sm btn-outline-navy" onclick="exportTableToExcel('eqCostTable','Equipment_Cost_Summary')"><i class="bi bi-file-earmark-excel"></i> Export</button>
+              <button class="btn btn-sm btn-outline-navy" onclick="printTable('eqCostTable','Equipment Wise Cost Summary')"><i class="bi bi-printer"></i> Print</button>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="table-responsive-wrap">
+              <table class="table table-industrial table-hover" id="eqCostTable">
+                <thead><tr>
+                  <th>Equipment</th><th>Fuel Cost</th><th>Spare Cost</th><th>Lubricant Cost</th><th>Labour Cost</th><th>Breakdown Cost</th><th>Total Cost</th>
+                </tr></thead>
+                <tbody id="eqCostTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ DAILY LOG ============ -->
+      <section class="page-section" id="page-dailylog">
+        <div class="panel">
+          <div class="panel-header">
+            <h6><i class="bi bi-journal-text"></i> Daily Log Entries</h6>
+            <div class="search-filter-bar no-print">
+              <input type="date" class="form-control form-control-sm" id="dlFilterDate">
+              <select class="form-select form-select-sm" id="dlFilterVehicle"><option value="">All Vehicles</option></select>
+              <input type="text" class="form-control form-control-sm" id="dlSearchBox" placeholder="Search...">
+              <button class="btn btn-sm btn-outline-navy" onclick="exportTableToExcel('dailyLogTable','Daily_Log')"><i class="bi bi-file-earmark-excel"></i> Export</button>
+              <button class="btn btn-sm btn-outline-navy" onclick="printTable('dailyLogTable','Daily Log Report')"><i class="bi bi-printer"></i> Print</button>
+              <button class="btn btn-sm btn-gold" data-bs-toggle="modal" data-bs-target="#dailyLogModal" onclick="openDailyLogModal()"><i class="bi bi-plus-lg"></i> New Entry</button>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="table-responsive-wrap">
+              <table class="table table-industrial table-hover" id="dailyLogTable">
+                <thead><tr>
+                  <th>Date</th><th>Vehicle</th><th>Day</th><th>Night</th><th>Day Trips</th><th>Night Trips</th><th>FTD Trips</th>
+                  <th>FTD Tons</th><th>STH Trips</th><th>OB Trips</th><th>Diesel (L)</th><th>Open KM/HMR</th><th>Close KM/HMR</th>
+                  <th>FTD Run</th><th>BD Hours</th><th class="no-print">Actions</th>
+                </tr></thead>
+                <tbody id="dailyLogTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ INVENTORY (3 tabs) ============ -->
+      <section class="page-section" id="page-inventory">
+        <ul class="nav nav-tabs nav-tabs-industrial mb-3" id="invTabs">
+          <li class="nav-item"><button class="nav-link active" data-inv="hardware">Hardware Store</button></li>
+          <li class="nav-item"><button class="nav-link" data-inv="lubricants">Lubricants Store</button></li>
+          <li class="nav-item"><button class="nav-link" data-inv="workshop">Workshop Consumables</button></li>
+        </ul>
+
+        <div class="inv-panel" id="inv-hardware">
+          <div class="panel">
+            <div class="panel-header">
+              <h6><i class="bi bi-tools"></i> Hardware Store Inventory</h6>
+              <div class="search-filter-bar no-print">
+                <input type="text" class="form-control form-control-sm" id="hwSearchBox" placeholder="Search material...">
+                <button class="btn btn-sm btn-outline-navy" onclick="exportTableToExcel('hwTable','Hardware_Store')"><i class="bi bi-file-earmark-excel"></i> Export</button>
+                <button class="btn btn-sm btn-outline-navy" onclick="printTable('hwTable','Hardware Store Inventory')"><i class="bi bi-printer"></i> Print</button>
+                <button class="btn btn-sm btn-gold" onclick="openInventoryModal('hardware')"><i class="bi bi-plus-lg"></i> Add Material</button>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="table-responsive-wrap">
+                <table class="table table-industrial table-hover" id="hwTable">
+                  <thead><tr><th>Material Code</th><th>Material Name</th><th>Unit</th><th>Opening Stock</th><th>Received Qty</th><th>Issued Qty</th><th>Closing Stock</th><th class="no-print">Actions</th></tr></thead>
+                  <tbody id="hwTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="inv-panel" id="inv-lubricants" style="display:none;">
+          <div class="panel">
+            <div class="panel-header">
+              <h6><i class="bi bi-droplet"></i> Lubricants Store Inventory</h6>
+              <div class="search-filter-bar no-print">
+                <input type="text" class="form-control form-control-sm" id="lubSearchBox" placeholder="Search material...">
+                <button class="btn btn-sm btn-outline-navy" onclick="exportTableToExcel('lubTable','Lubricants_Store')"><i class="bi bi-file-earmark-excel"></i> Export</button>
+                <button class="btn btn-sm btn-outline-navy" onclick="printTable('lubTable','Lubricants Store Inventory')"><i class="bi bi-printer"></i> Print</button>
+                <button class="btn btn-sm btn-gold" onclick="openInventoryModal('lubricants')"><i class="bi bi-plus-lg"></i> Add Material</button>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="table-responsive-wrap">
+                <table class="table table-industrial table-hover" id="lubTable">
+                  <thead><tr><th>Material Name</th><th>Unit</th><th>Opening Stock</th><th>Received Qty</th><th>Issued Qty</th><th>Closing Stock</th><th class="no-print">Actions</th></tr></thead>
+                  <tbody id="lubTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="inv-panel" id="inv-workshop" style="display:none;">
+          <div class="panel">
+            <div class="panel-header">
+              <h6><i class="bi bi-wrench-adjustable"></i> Workshop Consumables Inventory</h6>
+              <div class="search-filter-bar no-print">
+                <input type="text" class="form-control form-control-sm" id="wsSearchBox" placeholder="Search material...">
+                <button class="btn btn-sm btn-outline-navy" onclick="exportTableToExcel('wsTable','Workshop_Consumables')"><i class="bi bi-file-earmark-excel"></i> Export</button>
+                <button class="btn btn-sm btn-outline-navy" onclick="printTable('wsTable','Workshop Consumables Inventory')"><i class="bi bi-printer"></i> Print</button>
+                <button class="btn btn-sm btn-gold" onclick="openInventoryModal('workshop')"><i class="bi bi-plus-lg"></i> Add Material</button>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="table-responsive-wrap">
+                <table class="table table-industrial table-hover" id="wsTable">
+                  <thead><tr><th>Material Name</th><th>Unit</th><th>Opening Stock</th><th>Received Qty</th><th>Issued Qty</th><th>Closing Stock</th><th class="no-print">Actions</th></tr></thead>
+                  <tbody id="wsTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ MATERIAL ISSUE ============ -->
+      <section class="page-section" id="page-materialissue">
+        <div class="panel">
+          <div class="panel-header">
+            <h6><i class="bi bi-box-arrow-right"></i> Material Issue Entries</h6>
+            <div class="search-filter-bar no-print">
+              <input type="text" class="form-control form-control-sm" id="miSearchBox" placeholder="Search...">
+              <button class="btn btn-sm btn-outline-navy" onclick="exportTableToExcel('miTable','Material_Issue')"><i class="bi bi-file-earmark-excel"></i> Export</button>
+              <button class="btn btn-sm btn-outline-navy" onclick="printTable('miTable','Material Issue Report')"><i class="bi bi-printer"></i> Print</button>
+              <button class="btn btn-sm btn-gold" onclick="openMaterialIssueModal()"><i class="bi bi-plus-lg"></i> Issue Material</button>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="table-responsive-wrap">
+              <table class="table table-industrial table-hover" id="miTable">
+                <thead><tr><th>Date</th><th>Equipment No.</th><th>Material</th><th>Store</th><th>Qty Issued</th><th>Unit</th><th>Purpose</th><th>Issued By</th><th class="no-print">Actions</th></tr></thead>
+                <tbody id="miTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ SERVICE SCHEDULE ============ -->
+      <section class="page-section" id="page-service">
+        <div id="serviceAlertsContainer" class="mb-3"></div>
+        <div class="panel">
+          <div class="panel-header">
+            <h6><i class="bi bi-tools"></i> Service Schedule</h6>
+            <div class="search-filter-bar no-print">
+              <select class="form-select form-select-sm" id="svFilterCategory">
+                <option value="">All Categories</option>
+                <option value="Tipper">Tipper</option>
+                <option value="Excavator">Excavator</option>
+                <option value="Loader">Loader</option>
+              </select>
+              <select class="form-select form-select-sm" id="svFilterStatus">
+                <option value="">All Status</option>
+                <option value="OK">OK</option>
+                <option value="Due Soon">Due Soon</option>
+                <option value="Due">Due</option>
+              </select>
+              <button class="btn btn-sm btn-outline-navy" onclick="exportTableToExcel('serviceTable','Service_Schedule')"><i class="bi bi-file-earmark-excel"></i> Export</button>
+              <button class="btn btn-sm btn-outline-navy" onclick="printTable('serviceTable','Service Schedule')"><i class="bi bi-printer"></i> Print</button>
+              <button class="btn btn-sm btn-gold" onclick="openServiceModal()"><i class="bi bi-plus-lg"></i> Add / Update Service</button>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="table-responsive-wrap">
+              <table class="table table-industrial table-hover" id="serviceTable">
+                <thead><tr>
+                  <th>Equipment No.</th><th>Category</th><th>Service Type</th><th>Last Service Date</th><th>Last Service KM/HMR</th>
+                  <th>Current KM/HMR</th><th>Next Due KM/HMR</th><th>Balance KM/HMR</th><th>Status</th><th class="no-print">Actions</th>
+                </tr></thead>
+                <tbody id="serviceTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ BREAKDOWN HISTORY ============ -->
+      <section class="page-section" id="page-breakdown">
+        <div class="panel">
+          <div class="panel-header">
+            <h6><i class="bi bi-exclamation-triangle"></i> Breakdown History</h6>
+            <div class="search-filter-bar no-print">
+              <select class="form-select form-select-sm" id="bdFilterCategory">
+                <option value="">All Categories</option>
+                <option>Engine</option><option>Hydraulic</option><option>Electrical</option><option>Tyre</option>
+                <option>Transmission</option><option>Body</option><option>Structure</option><option>Other</option>
+              </select>
+              <input type="text" class="form-control form-control-sm" id="bdSearchBox" placeholder="Search...">
+              <button class="btn btn-sm btn-outline-navy" onclick="exportTableToExcel('breakdownTable','Breakdown_History')"><i class="bi bi-file-earmark-excel"></i> Export</button>
+              <button class="btn btn-sm btn-outline-navy" onclick="printTable('breakdownTable','Breakdown History Report')"><i class="bi bi-printer"></i> Print</button>
+              <button class="btn btn-sm btn-gold" onclick="openBreakdownModal()"><i class="bi bi-plus-lg"></i> Log Breakdown</button>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="table-responsive-wrap">
+              <table class="table table-industrial table-hover" id="breakdownTable">
+                <thead><tr>
+                  <th>Date</th><th>Equipment</th><th>Category</th><th>Problem</th><th>Start</th><th>End</th><th>Downtime (Hrs)</th>
+                  <th>Mechanic</th><th>Vendor</th><th>Spare ₹</th><th>Lube ₹</th><th>Labour ₹</th><th>Vendor ₹</th><th>Total ₹</th><th class="no-print">Actions</th>
+                </tr></thead>
+                <tbody id="breakdownTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ COST ANALYSIS ============ -->
+      <section class="page-section" id="page-costanalysis">
+        <div class="row g-3 mb-3">
+          <div class="col-md-3 col-6"><div class="kpi-mini"><div class="val" id="caCostPerKM">₹0</div><div class="lbl">Cost / KM</div></div></div>
+          <div class="col-md-3 col-6"><div class="kpi-mini"><div class="val" id="caCostPerHMR">₹0</div><div class="lbl">Cost / HMR</div></div></div>
+          <div class="col-md-3 col-6"><div class="kpi-mini"><div class="val" id="caCostPerTrip2">₹0</div><div class="lbl">Cost / Trip</div></div></div>
+          <div class="col-md-3 col-6"><div class="kpi-mini"><div class="val" id="caCostPerTon2">₹0</div><div class="lbl">Cost / Ton</div></div></div>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="chart-card"><h6 class="mb-2 fw-bold" style="color:var(--navy)">Cost Breakdown by Type</h6><canvas id="chartCostBreakdown"></canvas></div>
+          </div>
+          <div class="col-md-6">
+            <div class="chart-card"><h6 class="mb-2 fw-bold" style="color:var(--navy)">Top 5 Equipment by Total Cost</h6><canvas id="chartTopEquipment"></canvas></div>
+          </div>
+        </div>
+        <div class="panel mt-3">
+          <div class="panel-header">
+            <h6><i class="bi bi-table"></i> Detailed Equipment Cost Table</h6>
+            <div class="search-filter-bar no-print">
+              <button class="btn btn-sm btn-outline-navy" onclick="exportTableToExcel('eqCostTable2','Cost_Analysis')"><i class="bi bi-file-earmark-excel"></i> Export</button>
+              <button class="btn btn-sm btn-outline-navy" onclick="printTable('eqCostTable2','Cost Analysis Report')"><i class="bi bi-printer"></i> Print</button>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="table-responsive-wrap">
+              <table class="table table-industrial table-hover" id="eqCostTable2">
+                <thead><tr><th>Equipment</th><th>Fuel Cost</th><th>Spare Cost</th><th>Lubricant Cost</th><th>Labour Cost</th><th>Breakdown Cost</th><th>Total Cost</th></tr></thead>
+                <tbody id="eqCostTable2Body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ FLEET KPI ============ -->
+      <section class="page-section" id="page-fleetkpi">
+        <div class="row g-3 mb-3">
+          <div class="col-md-3 col-6"><div class="kpi-mini"><div class="val" id="fkAvailability">0%</div><div class="lbl">Fleet Availability</div></div></div>
+          <div class="col-md-3 col-6"><div class="kpi-mini"><div class="val" id="fkUtilization">0%</div><div class="lbl">Utilization</div></div></div>
+          <div class="col-md-3 col-6"><div class="kpi-mini"><div class="val" id="fkMTBF">0 hrs</div><div class="lbl">Avg. Hrs Between Breakdowns</div></div></div>
+          <div class="col-md-3 col-6"><div class="kpi-mini"><div class="val" id="fkTotalBD">0</div><div class="lbl">Total Breakdowns</div></div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <h6><i class="bi bi-bar-chart-steps"></i> Equipment Wise Availability &amp; Utilization</h6>
+            <div class="search-filter-bar no-print">
+              <button class="btn btn-sm btn-outline-navy" onclick="exportTableToExcel('fleetKpiTable','Fleet_KPI')"><i class="bi bi-file-earmark-excel"></i> Export</button>
+              <button class="btn btn-sm btn-outline-navy" onclick="printTable('fleetKpiTable','Fleet KPI Report')"><i class="bi bi-printer"></i> Print</button>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="table-responsive-wrap">
+              <table class="table table-industrial table-hover" id="fleetKpiTable">
+                <thead><tr><th>Equipment</th><th>Total Days Logged</th><th>Running Shifts</th><th>Breakdown Shifts</th><th>Availability %</th><th>FTD Trips Total</th><th>Utilization %</th></tr></thead>
+                <tbody id="fleetKpiTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ SETTINGS / DATA ============ -->
+      <section class="page-section" id="page-settings">
+        <div class="panel">
+          <div class="panel-header"><h6><i class="bi bi-sliders"></i> Data Management</h6></div>
+          <div class="panel-body">
+            <p class="text-muted">This application stores all data locally in your browser (LocalStorage). No data is sent to any server. Use the options below to back up or reset data.</p>
+            <div class="d-flex flex-wrap gap-2">
+              <button class="btn btn-outline-navy" onclick="backupAllData()"><i class="bi bi-download"></i> Backup All Data (JSON)</button>
+              <button class="btn btn-outline-navy" onclick="document.getElementById('restoreFileInput').click()"><i class="bi bi-upload"></i> Restore from Backup</button>
+              <input type="file" id="restoreFileInput" accept=".json" style="display:none" onchange="restoreAllData(event)">
+              <button class="btn btn-outline-danger" onclick="resetAllData()"><i class="bi bi-trash"></i> Reset All Data</button>
+              <button class="btn btn-gold" onclick="loadDemoData()"><i class="bi bi-stars"></i> Load Demo Data</button>
+            </div>
+            <hr>
+            <h6 class="fw-bold" style="color:var(--navy)">Fleet Master</h6>
+            <div class="table-responsive-wrap" style="max-height:300px;">
+              <table class="table table-industrial">
+                <thead><tr><th>Equipment No.</th><th>Category</th></tr></thead>
+                <tbody id="fleetMasterTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <footer class="app-footer">SGX Minerals Private Limited &mdash; Maintenance Module ERP &copy; <span id="footerYear"></span> | Demo data stored locally in browser</footer>
+  </div>
+</div>
+
+<!-- ===================================================================
+     MODALS
+=================================================================== -->
+
+<!-- DAILY LOG MODAL -->
+<div class="modal fade" id="dailyLogModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-journal-text"></i> Daily Log Entry</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="dailyLogForm">
+          <input type="hidden" id="dlEditId">
+          <div class="section-divider">Basic Details</div>
+          <div class="row g-3">
+            <div class="col-md-3"><label class="form-label">Date <span class="required-mark">*</span></label><input type="date" class="form-control" id="dlDate" required></div>
+            <div class="col-md-3"><label class="form-label">Vehicle Number <span class="required-mark">*</span></label>
+              <select class="form-select" id="dlVehicle" required><option value="">Select Vehicle</option></select>
+            </div>
+            <div class="col-md-3"><label class="form-label">Day Status <span class="required-mark">*</span></label>
+              <select class="form-select" id="dlDayStatus" required><option value="">Select</option><option value="R">R - Running</option><option value="B">B - Breakdown</option></select>
+            </div>
+            <div class="col-md-3"><label class="form-label">Night Status <span class="required-mark">*</span></label>
+              <select class="form-select" id="dlNightStatus" required><option value="">Select</option><option value="R">R - Running</option><option value="B">B - Breakdown</option></select>
+            </div>
+          </div>
+
+          <div class="section-divider">Production Details</div>
+          <div class="row g-3">
+            <div class="col-md-2"><label class="form-label">Day Trips</label><input type="number" min="0" class="form-control" id="dlDayTrips" value="0"></div>
+            <div class="col-md-2"><label class="form-label">Night Trips</label><input type="number" min="0" class="form-control" id="dlNightTrips" value="0"></div>
+            <div class="col-md-2"><label class="form-label">FTD Trips</label><input type="text" class="form-control calc-field" id="dlFtdTrips" readonly value="0"></div>
+            <div class="col-md-2"><label class="form-label">FTD Tons</label><input type="number" min="0" step="0.01" class="form-control" id="dlFtdTons" value="0"></div>
+            <div class="col-md-2"><label class="form-label">Stock To Hopper Trips</label><input type="number" min="0" class="form-control" id="dlSthTrips" value="0"></div>
+            <div class="col-md-2"><label class="form-label">OB Trips</label><input type="number" min="0" class="form-control" id="dlObTrips" value="0"></div>
+          </div>
+
+          <div class="section-divider">Diesel &amp; KM/HMR</div>
+          <div class="row g-3">
+            <div class="col-md-3"><label class="form-label">Diesel Issued (Ltr)</label><input type="number" min="0" step="0.01" class="form-control" id="dlDiesel" value="0"></div>
+            <div class="col-md-3"><label class="form-label">Opening KM/HMR</label><input type="number" min="0" step="0.1" class="form-control" id="dlOpenKm" value="0"></div>
+            <div class="col-md-3"><label class="form-label">Closing KM/HMR</label><input type="number" min="0" step="0.1" class="form-control" id="dlCloseKm" value="0"></div>
+            <div class="col-md-3"><label class="form-label">FTD KM/HMR Run</label><input type="text" class="form-control calc-field" id="dlFtdRun" readonly value="0"></div>
+          </div>
+
+          <div id="dlDayBreakdownSection" style="display:none;">
+            <div class="section-divider text-danger" style="border-bottom-color:var(--danger)">Day Breakdown</div>
+            <div class="row g-3">
+              <div class="col-md-6"><label class="form-label">Day Breakdown From Time</label><input type="time" class="form-control" id="dlDayBdFrom"></div>
+              <div class="col-md-6"><label class="form-label">Day Breakdown To Time</label><input type="time" class="form-control" id="dlDayBdTo"></div>
+            </div>
+          </div>
+
+          <div id="dlNightBreakdownSection" style="display:none;">
+            <div class="section-divider text-danger" style="border-bottom-color:var(--danger)">Night Breakdown</div>
+            <div class="row g-3">
+              <div class="col-md-6"><label class="form-label">Night Breakdown From Time</label><input type="time" class="form-control" id="dlNightBdFrom"></div>
+              <div class="col-md-6"><label class="form-label">Night Breakdown To Time</label><input type="time" class="form-control" id="dlNightBdTo"></div>
+            </div>
+          </div>
+
+          <div id="dlMaintSection" style="display:none;">
+            <div class="row g-3">
+              <div class="col-md-12"><label class="form-label">Maintenance Description</label><textarea class="form-control" id="dlMaintDesc" rows="2"></textarea></div>
+            </div>
+          </div>
+
+          <div class="section-divider">Remarks &amp; Summary</div>
+          <div class="row g-3">
+            <div class="col-md-8"><label class="form-label">Remarks</label><textarea class="form-control" id="dlRemarks" rows="2"></textarea></div>
+            <div class="col-md-4">
+              <label class="form-label">Total Breakdown Hours</label>
+              <div class="readonly-pill" id="dlTotalBdHours">0.00 hrs</div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-gold" onclick="saveDailyLog()"><i class="bi bi-check-lg"></i> Save Entry</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INVENTORY MODAL -->
+<div class="modal fade" id="inventoryModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="invModalTitle"><i class="bi bi-boxes"></i> Add Material</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="inventoryForm">
+          <input type="hidden" id="invEditId">
+          <input type="hidden" id="invStoreType">
+          <div class="row g-3">
+            <div class="col-12" id="invMaterialCodeWrap"><label class="form-label">Material Code</label><input type="text" class="form-control" id="invMaterialCode"></div>
+            <div class="col-12"><label class="form-label">Material Name <span class="required-mark">*</span></label><input type="text" class="form-control" id="invMaterialName" required></div>
+            <div class="col-md-6"><label class="form-label">Unit <span class="required-mark">*</span></label>
+              <select class="form-select" id="invUnit" required>
+                <option value="Pcs">Pcs</option><option value="Ltr">Ltr</option><option value="Kg">Kg</option>
+                <option value="Box">Box</option><option value="Set">Set</option><option value="Mtr">Mtr</option><option value="Nos">Nos</option>
+              </select>
+            </div>
+            <div class="col-md-6"><label class="form-label">Opening Stock</label><input type="number" min="0" step="0.01" class="form-control" id="invOpening" value="0"></div>
+            <div class="col-md-6"><label class="form-label">Received Qty</label><input type="number" min="0" step="0.01" class="form-control" id="invReceived" value="0"></div>
+            <div class="col-md-6"><label class="form-label">Issued Qty</label><input type="number" min="0" step="0.01" class="form-control" id="invIssued" value="0"></div>
+            <div class="col-12"><label class="form-label">Closing Stock</label><input type="text" class="form-control calc-field" id="invClosing" readonly value="0"></div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-gold" onclick="saveInventoryItem()"><i class="bi bi-check-lg"></i> Save Material</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MATERIAL ISSUE MODAL -->
+<div class="modal fade" id="materialIssueModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-box-arrow-right"></i> Material Issue Entry</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="materialIssueForm">
+          <div class="row g-3">
+            <div class="col-md-6"><label class="form-label">Date <span class="required-mark">*</span></label><input type="date" class="form-control" id="miDate" required></div>
+            <div class="col-md-6"><label class="form-label">Equipment Number <span class="required-mark">*</span></label>
+              <select class="form-select" id="miEquipment" required><option value="">Select Equipment</option></select>
+            </div>
+            <div class="col-md-6"><label class="form-label">Store <span class="required-mark">*</span></label>
+              <select class="form-select" id="miStore" required onchange="populateMaterialOptions()">
+                <option value="">Select Store</option>
+                <option value="hardware">Hardware Store</option>
+                <option value="lubricants">Lubricants Store</option>
+                <option value="workshop">Workshop Consumables</option>
+              </select>
+            </div>
+            <div class="col-md-6"><label class="form-label">Material Name <span class="required-mark">*</span></label>
+              <select class="form-select" id="miMaterial" required onchange="updateMiAvailableStock()"><option value="">Select Material</option></select>
+            </div>
+            <div class="col-md-6"><label class="form-label">Qty Issued <span class="required-mark">*</span></label><input type="number" min="0.01" step="0.01" class="form-control" id="miQty" required></div>
+            <div class="col-md-6"><label class="form-label">Available Stock</label><div class="readonly-pill" id="miAvailStock">-</div></div>
+            <div class="col-md-6"><label class="form-label">Purpose <span class="required-mark">*</span></label><input type="text" class="form-control" id="miPurpose" placeholder="e.g. Tyre replacement" required></div>
+            <div class="col-md-6"><label class="form-label">Issued By <span class="required-mark">*</span></label><input type="text" class="form-control" id="miIssuedBy" required></div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-gold" onclick="saveMaterialIssue()"><i class="bi bi-check-lg"></i> Issue Material</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SERVICE MODAL -->
+<div class="modal fade" id="serviceModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-tools"></i> Add / Update Service Record</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="serviceForm">
+          <input type="hidden" id="svEditId">
+          <div class="row g-3">
+            <div class="col-md-6"><label class="form-label">Equipment Number <span class="required-mark">*</span></label>
+              <select class="form-select" id="svEquipment" required onchange="autoFillServiceCategory()"><option value="">Select Equipment</option></select>
+            </div>
+            <div class="col-md-6"><label class="form-label">Category</label><input type="text" class="form-control" id="svCategory" readonly></div>
+            <div class="col-md-6"><label class="form-label">Service Type <span class="required-mark">*</span></label>
+              <select class="form-select" id="svServiceType" required onchange="calcServiceFields()">
+                <option value="">Select</option>
+                <option value="500">500 Service</option>
+                <option value="1000">1000 Service</option>
+                <option value="2000">2000 Service</option>
+                <option value="4000">4000 Service</option>
+              </select>
+            </div>
+            <div class="col-md-6"><label class="form-label">Last Service Date <span class="required-mark">*</span></label><input type="date" class="form-control" id="svLastDate" required></div>
+            <div class="col-md-6"><label class="form-label">Last Service KM/HMR <span class="required-mark">*</span></label><input type="number" min="0" step="0.1" class="form-control" id="svLastKm" required oninput="calcServiceFields()"></div>
+            <div class="col-md-6"><label class="form-label">Current KM/HMR <span class="required-mark">*</span></label><input type="number" min="0" step="0.1" class="form-control" id="svCurrentKm" required oninput="calcServiceFields()"></div>
+            <div class="col-md-6"><label class="form-label">Next Due KM/HMR</label><input type="text" class="form-control calc-field" id="svNextDue" readonly></div>
+            <div class="col-md-6"><label class="form-label">Balance KM/HMR</label><input type="text" class="form-control calc-field" id="svBalance" readonly></div>
+            <div class="col-12"><label class="form-label">Status</label><div class="readonly-pill" id="svStatusDisplay">-</div></div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-gold" onclick="saveServiceRecord()"><i class="bi bi-check-lg"></i> Save Record</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BREAKDOWN MODAL -->
+<div class="modal fade" id="breakdownModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Log Breakdown / Repair</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="breakdownForm">
+          <input type="hidden" id="bdEditId">
+          <div class="section-divider">Breakdown Details</div>
+          <div class="row g-3">
+            <div class="col-md-4"><label class="form-label">Breakdown Date <span class="required-mark">*</span></label><input type="date" class="form-control" id="bdDate" required></div>
+            <div class="col-md-4"><label class="form-label">Equipment Number <span class="required-mark">*</span></label>
+              <select class="form-select" id="bdEquipment" required><option value="">Select Equipment</option></select>
+            </div>
+            <div class="col-md-4"><label class="form-label">Breakdown Category <span class="required-mark">*</span></label>
+              <select class="form-select" id="bdCategory" required>
+                <option value="">Select</option>
+                <option>Engine</option><option>Hydraulic</option><option>Electrical</option><option>Tyre</option>
+                <option>Transmission</option><option>Body</option><option>Structure</option><option>Other</option>
+              </select>
+            </div>
+            <div class="col-md-6"><label class="form-label">Problem Description <span class="required-mark">*</span></label><textarea class="form-control" id="bdProblem" rows="2" required></textarea></div>
+            <div class="col-md-6"><label class="form-label">Root Cause</label><textarea class="form-control" id="bdRootCause" rows="2"></textarea></div>
+            <div class="col-12"><label class="form-label">Action Taken</label><textarea class="form-control" id="bdAction" rows="2"></textarea></div>
+          </div>
+
+          <div class="section-divider">Downtime</div>
+          <div class="row g-3">
+            <div class="col-md-4"><label class="form-label">Breakdown Start Time <span class="required-mark">*</span></label><input type="datetime-local" class="form-control" id="bdStart" required oninput="calcBreakdownDowntime()"></div>
+            <div class="col-md-4"><label class="form-label">Breakdown End Time <span class="required-mark">*</span></label><input type="datetime-local" class="form-control" id="bdEnd" required oninput="calcBreakdownDowntime()"></div>
+            <div class="col-md-4"><label class="form-label">Downtime Hours</label><input type="text" class="form-control calc-field" id="bdDowntime" readonly value="0.00"></div>
+          </div>
+
+          <div class="section-divider">Repair &amp; Cost</div>
+          <div class="row g-3">
+            <div class="col-md-6"><label class="form-label">Parts Used</label><input type="text" class="form-control" id="bdParts"></div>
+            <div class="col-md-3"><label class="form-label">Mechanic Name</label><input type="text" class="form-control" id="bdMechanic"></div>
+            <div class="col-md-3"><label class="form-label">Vendor Name</label><input type="text" class="form-control" id="bdVendor"></div>
+            <div class="col-md-3"><label class="form-label">Spare Cost (₹)</label><input type="number" min="0" step="0.01" class="form-control bd-cost" id="bdSpareCost" value="0" oninput="calcBreakdownTotalCost()"></div>
+            <div class="col-md-3"><label class="form-label">Lubricant Cost (₹)</label><input type="number" min="0" step="0.01" class="form-control bd-cost" id="bdLubeCost" value="0" oninput="calcBreakdownTotalCost()"></div>
+            <div class="col-md-3"><label class="form-label">Labour Cost (₹)</label><input type="number" min="0" step="0.01" class="form-control bd-cost" id="bdLabourCost" value="0" oninput="calcBreakdownTotalCost()"></div>
+            <div class="col-md-3"><label class="form-label">Vendor Cost (₹)</label><input type="number" min="0" step="0.01" class="form-control bd-cost" id="bdVendorCost" value="0" oninput="calcBreakdownTotalCost()"></div>
+            <div class="col-md-6"><label class="form-label">Total Repair Cost</label><div class="readonly-pill" id="bdTotalCostDisplay">₹0.00</div></div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-gold" onclick="saveBreakdownRecord()"><i class="bi bi-check-lg"></i> Save Record</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1080;">
+  <div id="appToast" class="toast align-items-center text-bg-success border-0" role="alert">
+    <div class="d-flex">
+      <div class="toast-body" id="appToastBody">Saved successfully.</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
